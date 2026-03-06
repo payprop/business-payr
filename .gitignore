@@ -1,0 +1,26 @@
+*.bak
+*.old
+*.orig
+*.rej
+*.swp
+*~
+.DS_Store
+/blib/
+/Makefile
+/Makefile.old
+/MANIFEST.bak
+/META.json
+/META.yml
+/MYMETA.json
+/MYMETA.yml
+/pm_to_blib
+/_build/
+/Build
+/Build.bat
+*.tar.gz
+cover_db/
+nytprof.out
+nytprof/
+business-payr-credentials.json
+
+# vim: ts=4:sw=4:et

@@ -1,0 +1,34 @@
+To run the author tests you will need a JSON file describing your Payr
+sandbox credentials, structured as follows:
+
+    /path/to/working/business-payr > cat business-payr-credentials.json
+    {
+        "api_token"   : "your_sandbox_server_api_token",
+        "api_host"    : "sandbox-api.mypayr.co.uk",
+        "iframe_host" : "sandbox.mypayr.co.uk"
+    }
+
+Contact support@mypayr.co.uk to request sandbox access and obtain your
+initial server API token.
+
+Once you have the credentials file, set the PAYR_CREDENTIALS environment
+variable to its path and run the author tests with prove:
+
+    PAYR_CREDENTIALS=business-payr-credentials.json prove -lr xt/
+
+The author tests are designed to be run in order:
+
+    xt/000_changes.t         - Verifies the Changes file is correctly formatted
+    xt/001_onboard.t         - Onboards test users into the sandbox environment
+    xt/002_payment_session.t - Creates payment sessions for onboarded users
+                               (requires xt/001_onboard.t to have been run first)
+    xt/003_rotate_token.t    - Rotates the server API token
+
+NOTE: xt/003_rotate_token.t will rotate the API token stored in your
+credentials file.  After running it, update the "api_token" value in your
+credentials file with the new token printed in the test output.  The old
+token remains valid for a grace period of 7-15 days.
+
+To run a single author test file:
+
+    PAYR_CREDENTIALS=business-payr-credentials.json prove -lv xt/001_onboard.t
