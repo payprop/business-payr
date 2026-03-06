@@ -32,7 +32,7 @@ subtest 'default hosts' => sub {
     is( $Prod->iframe_host, 'mypayr.co.uk',     '->iframe_host defaults to production' );
 };
 
-subtest '->onboard_user (single user)' => sub {
+subtest '->onboard_user (single user with kyc)' => sub {
 
     no warnings qw/ once redefine /;
     local *Business::Payr::Request::api_post = sub {
@@ -41,11 +41,24 @@ subtest '->onboard_user (single user)' => sub {
 
     ok(
         $Payr->onboard_user( _single_user_args() ),
-        '->onboard_user returns true on success'
+        '->onboard_user returns true when kyc is supplied'
     );
 };
 
-subtest '->onboard_user (batch)' => sub {
+subtest '->onboard_user (single user with agent_id, no kyc)' => sub {
+
+    no warnings qw/ once redefine /;
+    local *Business::Payr::Request::api_post = sub {
+        return { message => 'Users onboarded successfully' };
+    };
+
+    ok(
+        $Payr->onboard_user( _single_user_args_with_agent_id() ),
+        '->onboard_user returns true when agent_id is supplied instead of kyc'
+    );
+};
+
+subtest '->onboard_user (batch with kyc)' => sub {
 
     no warnings qw/ once redefine /;
     local *Business::Payr::Request::api_post = sub {
@@ -54,8 +67,111 @@ subtest '->onboard_user (batch)' => sub {
 
     ok(
         $Payr->onboard_user( [ _single_user_args(), _single_user_args() ] ),
-        '->onboard_user returns true on batch success'
+        '->onboard_user returns true on batch success with kyc'
     );
+};
+
+subtest '->onboard_user (batch with mixed kyc and agent_id)' => sub {
+
+    no warnings qw/ once redefine /;
+    local *Business::Payr::Request::api_post = sub {
+        return { message => 'Users onboarded successfully' };
+    };
+
+    ok(
+        $Payr->onboard_user( [ _single_user_args(), _single_user_args_with_agent_id() ] ),
+        '->onboard_user returns true for batch where one user has kyc and one has agent_id'
+    );
+};
+
+subtest '->onboard_user validation' => sub {
+
+    subtest 'neither kyc nor agent_id raises an exception' => sub {
+
+        my %args = _single_user_args()->%*;
+        delete $args{kyc};
+
+        throws_ok(
+            sub { $Payr->onboard_user( \%args ) },
+            qr/must supply either 'kyc'.*or 'agent_id'/,
+            'missing both kyc and agent_id throws a meaningful error'
+        );
+    };
+
+    subtest 'neither kyc nor agent_id in a batch raises an exception' => sub {
+
+        my %args = _single_user_args()->%*;
+        delete $args{kyc};
+
+        throws_ok(
+            sub { $Payr->onboard_user( [ _single_user_args(), \%args ] ) },
+            qr/must supply either 'kyc'.*or 'agent_id'/,
+            'one invalid user in a batch throws before the API is called'
+        );
+    };
+
+    subtest 'agent_id of zero raises an exception' => sub {
+
+        my %args = _single_user_args_with_agent_id()->%*;
+        $args{agent_id} = 0;
+
+        throws_ok(
+            sub { $Payr->onboard_user( \%args ) },
+            qr/'agent_id' must be a positive integer/,
+            'agent_id of zero throws a meaningful error'
+        );
+    };
+
+    subtest 'negative agent_id raises an exception' => sub {
+
+        my %args = _single_user_args_with_agent_id()->%*;
+        $args{agent_id} = -1;
+
+        throws_ok(
+            sub { $Payr->onboard_user( \%args ) },
+            qr/'agent_id' must be a positive integer/,
+            'negative agent_id throws a meaningful error'
+        );
+    };
+
+    subtest 'non-integer agent_id raises an exception' => sub {
+
+        my %args = _single_user_args_with_agent_id()->%*;
+        $args{agent_id} = 'not-an-integer';
+
+        throws_ok(
+            sub { $Payr->onboard_user( \%args ) },
+            qr/'agent_id' must be a positive integer/,
+            'string agent_id throws a meaningful error'
+        );
+    };
+
+    subtest 'undef agent_id raises an exception' => sub {
+
+        my %args = _single_user_args_with_agent_id()->%*;
+        $args{agent_id} = undef;
+
+        throws_ok(
+            sub { $Payr->onboard_user( \%args ) },
+            qr/'agent_id' must be a positive integer/,
+            'undef agent_id throws a meaningful error'
+        );
+    };
+
+    subtest 'no API call is made when validation fails' => sub {
+
+        my $api_called = 0;
+
+        no warnings qw/ once redefine /;
+        local *Business::Payr::Request::api_post = sub { $api_called++ };
+
+        my %args = _single_user_args()->%*;
+        delete $args{kyc};
+
+        eval { $Payr->onboard_user( \%args ) };
+
+        is( $api_called, 0, 'api_post was not called when validation failed' );
+    };
 };
 
 subtest '->create_payment_session' => sub {
@@ -138,6 +254,19 @@ sub _single_user_args {
         date_of_birth => '2000-03-15',
         tenant        => [ _tenant_args() ],
         kyc           => _kyc_args(),
+    };
+}
+
+sub _single_user_args_with_agent_id {
+    return {
+        user_id       => 12346,
+        email         => '[email protected]',
+        first_name    => 'Jane',
+        last_name     => 'Doe',
+        phone_number  => '+447900654321',
+        date_of_birth => '1998-07-22',
+        tenant        => [ _tenant_args() ],
+        agent_id     => 99,
     };
 }
 

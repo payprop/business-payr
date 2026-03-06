@@ -14,17 +14,43 @@ use Business::Payr;
 plan skip_all => "set PAYR_CREDENTIALS to run author tests"
     if ! $ENV{PAYR_CREDENTIALS};
 
-my $Payr = Business::Payr->new(
-    Test::Credentials->new->TO_JSON->%*,
-);
+my $creds    = Test::Credentials->new;
+my $use_kyc  = $creds->kyc;
+
+my $Payr = Business::Payr->new( $creds->TO_JSON->%* );
 
 isa_ok( $Payr, 'Business::Payr' );
+
+my $auth_desc = $use_kyc ? 'kyc' : 'agent_id';
+
+note( "Onboarding author tests running in '$auth_desc' mode" );
+
+# ---------------------------------------------------------------------------
+# _onboard_auth - returns the appropriate auth key/value pair for onboard_user
+# depending on the "kyc" flag in the credentials file.
+#
+# Usage: $Payr->onboard_user({ ..., _onboard_auth() });
+#
+# kyc:true  -> ( kyc      => { pii_front => undef, ... } )
+# kyc:false -> ( agent_id => 1 )
+# ---------------------------------------------------------------------------
+
+sub _onboard_auth {
+    return $use_kyc
+        ? ( kyc => {
+                pii_front => undef,
+                pii_back  => undef,
+                photo     => undef,
+                status    => 'pending',
+            } )
+        : ( agent_id => 1 );
+}
 
 # ---------------------------------------------------------------------------
 # Single user onboarding
 # ---------------------------------------------------------------------------
 
-subtest 'onboard a single user' => sub {
+subtest "onboard a single user (using $auth_desc)" => sub {
 
     ok(
         $Payr->onboard_user({
@@ -54,14 +80,9 @@ subtest 'onboard a single user' => sub {
                     agreement                     => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
                 },
             ],
-            kyc => {
-                pii_front => undef,
-                pii_back  => undef,
-                photo     => undef,
-                status    => 'pending',
-            },
+            _onboard_auth(),
         }),
-        '->onboard_user returns true for a single user'
+        "->onboard_user returns true for a single user using $auth_desc"
     );
 };
 
@@ -69,7 +90,7 @@ subtest 'onboard a single user' => sub {
 # Re-onboarding the same user (idempotency) - should update mutable fields
 # ---------------------------------------------------------------------------
 
-subtest 'onboard the same user again (idempotency / update)' => sub {
+subtest "onboard the same user again (idempotency / update, using $auth_desc)" => sub {
 
     ok(
         $Payr->onboard_user({
@@ -100,14 +121,9 @@ subtest 'onboard the same user again (idempotency / update)' => sub {
                     agreement                     => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
                 },
             ],
-            kyc => {
-                pii_front => undef,
-                pii_back  => undef,
-                photo     => undef,
-                status    => 'pending',
-            },
+            _onboard_auth(),
         }),
-        '->onboard_user returns true when re-onboarding the same user'
+        "->onboard_user returns true when re-onboarding the same user using $auth_desc"
     );
 };
 
@@ -115,7 +131,7 @@ subtest 'onboard the same user again (idempotency / update)' => sub {
 # Onboarding a user with quarterly rent frequency
 # ---------------------------------------------------------------------------
 
-subtest 'onboard a user with quarterly rent frequency' => sub {
+subtest "onboard a user with quarterly rent frequency (using $auth_desc)" => sub {
 
     ok(
         $Payr->onboard_user({
@@ -145,14 +161,9 @@ subtest 'onboard a user with quarterly rent frequency' => sub {
                     agreement                     => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
                 },
             ],
-            kyc => {
-                pii_front => undef,
-                pii_back  => undef,
-                photo     => undef,
-                status    => 'pending',
-            },
+            _onboard_auth(),
         }),
-        '->onboard_user returns true for quarterly rent frequency'
+        "->onboard_user returns true for quarterly rent frequency using $auth_desc"
     );
 };
 
@@ -160,7 +171,7 @@ subtest 'onboard a user with quarterly rent frequency' => sub {
 # Onboarding a user with an installment schedule
 # ---------------------------------------------------------------------------
 
-subtest 'onboard a user with an installment schedule' => sub {
+subtest "onboard a user with an installment schedule (using $auth_desc)" => sub {
 
     ok(
         $Payr->onboard_user({
@@ -196,14 +207,9 @@ subtest 'onboard a user with an installment schedule' => sub {
                 { installment_number => 3, due_date => '2025-04-01', amount => 75000 },
                 { installment_number => 4, due_date => '2025-05-01', amount => 75000 },
             ],
-            kyc => {
-                pii_front => undef,
-                pii_back  => undef,
-                photo     => undef,
-                status    => 'pending',
-            },
+            _onboard_auth(),
         }),
-        '->onboard_user returns true for user with installment schedule'
+        "->onboard_user returns true for user with installment schedule using $auth_desc"
     );
 };
 
@@ -211,7 +217,7 @@ subtest 'onboard a user with an installment schedule' => sub {
 # Batch onboarding
 # ---------------------------------------------------------------------------
 
-subtest 'batch onboard multiple users' => sub {
+subtest "batch onboard multiple users (using $auth_desc)" => sub {
 
     ok(
         $Payr->onboard_user([
@@ -242,7 +248,7 @@ subtest 'batch onboard multiple users' => sub {
                         agreement                     => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
                     },
                 ],
-                kyc => { pii_front => undef, pii_back => undef, photo => undef, status => 'pending' },
+                _onboard_auth(),
             },
             {
                 user_id       => 99005,
@@ -271,10 +277,10 @@ subtest 'batch onboard multiple users' => sub {
                         agreement                     => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
                     },
                 ],
-                kyc => { pii_front => undef, pii_back => undef, photo => undef, status => 'pending' },
+                _onboard_auth(),
             },
         ]),
-        '->onboard_user returns true for batch of two users'
+        "->onboard_user returns true for batch of two users using $auth_desc"
     );
 };
 

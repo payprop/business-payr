@@ -1,6 +1,6 @@
 Revision history for Business-Payr
 
-0.01     2025-06-09
+0.01     2026-04-13
         - First release
         - Support for /thirdparty/onboarding/ endpoint (onboard_user)
         - Support for /thirdparty/user-login/ endpoint (create_payment_session)

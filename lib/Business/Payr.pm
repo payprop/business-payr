@@ -109,6 +109,7 @@ no warnings qw/ experimental::signatures experimental::postderef /;
 use namespace::autoclean;
 
 use Business::Payr::PaymentSession;
+use Carp qw/ croak /;
 
 $Business::Payr::VERSION = '0.01';
 
@@ -130,8 +131,13 @@ hash references (multiple users) containing the fields described at
 L<https://docs.mypayr.co.uk/onboarding>.
 
 Required user fields: C<user_id>, C<email>, C<first_name>, C<last_name>,
-C<phone_number>, C<date_of_birth>, C<tenant> (array), C<kyc> (object)
-B<or> C<agent_id>.
+C<phone_number>, C<date_of_birth>, C<tenant> (array), and B<either>
+C<kyc> (object) B<or> C<agent_id> (integer).
+
+The C<kyc> field is optional. When it is not provided, C<agent_id> must be
+supplied instead — this is an integer reference to the agency associated with
+the tenancy, similar in type to C<user_id>. Supplying neither will result in
+an exception being thrown before any API call is made.
 
 If a user already exists (matched by C<user_id>), their information is
 updated. If a tenancy already exists (matched by C<user_id>,
@@ -147,8 +153,35 @@ sub onboard_user (
     $self,
     $user_args,
 ) {
+    # Validate each user record before making the API call — this provides
+    # clearer error messages than relying solely on the API's 400 responses.
+    my @users = ref $user_args eq 'ARRAY' ? @{$user_args} : ( $user_args );
+    $self->_validate_onboard_args( $_ ) for @users;
+
     $self->api_post( '/onboarding/', $user_args );
     return 1;
+}
+
+sub _validate_onboard_args ( $self, $user ) {
+
+    unless ( exists $user->{kyc} || exists $user->{agent_id} ) {
+        croak "onboard_user: each user must supply either 'kyc' (object) "
+            . "or 'agent_id' (integer), but neither was found";
+    }
+
+    if ( exists $user->{agent_id} ) {
+        my $agent_id = $user->{agent_id};
+        unless (
+            defined $agent_id
+            && $agent_id =~ /\A[0-9]+\z/
+            && $agent_id > 0
+        ) {
+            croak "onboard_user: 'agent_id' must be a positive integer, got: "
+                . ( defined $agent_id ? "'$agent_id'" : 'undef' );
+        }
+    }
+
+    return $self;
 }
 
 =head2 create_payment_session

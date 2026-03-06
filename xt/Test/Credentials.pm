@@ -31,8 +31,14 @@ The JSON file is expected to contain:
     {
         "api_token"   : "your_sandbox_server_api_token",
         "api_host"    : "sandbox-api.mypayr.co.uk",
-        "iframe_host" : "sandbox.mypayr.co.uk"
+        "iframe_host" : "sandbox.mypayr.co.uk",
+        "kyc"         : true
     }
+
+The optional C<kyc> flag controls which authentication parameter is used when
+calling the C</thirdparty/onboarding/> endpoint in author tests.  When set to
+C<true>, onboarding calls include a C<kyc> object.  When absent or C<false>,
+an C<agent_id> integer is used instead.  Defaults to C<false>.
 
 =cut
 
@@ -83,11 +89,19 @@ Defaults to C<sandbox-api.mypayr.co.uk> if not present in the credentials file.
 The Payr sandbox iframe hostname (e.g. C<sandbox.mypayr.co.uk>).
 Defaults to C<sandbox.mypayr.co.uk> if not present in the credentials file.
 
+=head2 kyc
+
+Boolean flag indicating whether onboarding author tests should supply a C<kyc>
+object (C<true>) or an C<agent_id> integer (C<false>).  Reads the C<"kyc">
+key from the credentials file.  Defaults to C<0> (i.e. use C<agent_id>) when
+the key is absent.
+
 =cut
 
-sub api_token   { $_[0]->_data->{api_token}                             }
+sub api_token   { $_[0]->_data->{api_token}                              }
 sub api_host    { $_[0]->_data->{api_host}    // 'sandbox-api.mypayr.co.uk' }
 sub iframe_host { $_[0]->_data->{iframe_host} // 'sandbox.mypayr.co.uk'     }
+sub kyc         { $_[0]->_data->{kyc}         ?  1 : 0                      }
 
 =head1 METHODS
 

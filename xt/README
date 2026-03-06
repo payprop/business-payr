@@ -5,8 +5,18 @@ sandbox credentials, structured as follows:
     {
         "api_token"   : "your_sandbox_server_api_token",
         "api_host"    : "sandbox-api.mypayr.co.uk",
-        "iframe_host" : "sandbox.mypayr.co.uk"
+        "iframe_host" : "sandbox.mypayr.co.uk",
+        "kyc"         : true
     }
+
+The "kyc" key is optional and controls which authentication parameter the
+onboarding tests (xt/001_onboard.t) pass to /thirdparty/onboarding/:
+
+    "kyc": true   - onboarding calls include a "kyc" object
+    "kyc": false  - onboarding calls include an "agent_id" integer instead
+                    (this is the default when the key is absent)
+
+Set this to match the configuration of your Payr sandbox account.
 
 Contact support@mypayr.co.uk to request sandbox access and obtain your
 initial server API token.
@@ -19,7 +29,9 @@ variable to its path and run the author tests with prove:
 The author tests are designed to be run in order:
 
     xt/000_changes.t         - Verifies the Changes file is correctly formatted
-    xt/001_onboard.t         - Onboards test users into the sandbox environment
+    xt/001_onboard.t         - Onboards test users into the sandbox environment.
+                               Uses "kyc" or "agent_id" based on the credentials
+                               file (see the "kyc" flag above).
     xt/002_payment_session.t - Creates payment sessions for onboarded users
                                (requires xt/001_onboard.t to have been run first)
     xt/003_rotate_token.t    - Rotates the server API token
