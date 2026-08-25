@@ -54,8 +54,8 @@ subtest "onboard a single user (using $auth_desc)" => sub {
 
     ok(
         $Payr->onboard_user({
-            user_id       => 99001,
-            email         => 'test.user.99001@example.com',
+            user_id       => 990010,
+            email         => 'test.user.990010@example.com',
             first_name    => 'Test',
             last_name     => 'User',
             phone_number  => '+447900000001',
@@ -73,7 +73,7 @@ subtest "onboard a single user (using $auth_desc)" => sub {
                     amount                        => '850.00',
                     frequency                     => 'every_1_month',
                     is_active                     => \1,
-                    payment_reference             => 'TST-2024-99001',
+                    payment_reference             => 'TST-2024-990010',
                     recipient_bank_sort_code      => '20-00-00',
                     recipient_bank_account_number => '55779911',
                     recipient_bank_account_name   => 'Test Housing Ltd',
@@ -94,8 +94,8 @@ subtest "onboard the same user again (idempotency / update, using $auth_desc)" =
 
     ok(
         $Payr->onboard_user({
-            user_id       => 99001,
-            email         => 'test.user.99001@example.com',
+            user_id       => 990010,
+            email         => 'test.user.990010@example.com',
             first_name    => 'Test',
             last_name     => 'User',
             phone_number  => '+447900000001',
@@ -114,7 +114,7 @@ subtest "onboard the same user again (idempotency / update, using $auth_desc)" =
                     amount                        => '875.00',
                     frequency                     => 'every_1_month',
                     is_active                     => \1,
-                    payment_reference             => 'TST-2024-99001',
+                    payment_reference             => 'TST-2024-990010',
                     recipient_bank_sort_code      => '20-00-00',
                     recipient_bank_account_number => '55779911',
                     recipient_bank_account_name   => 'Test Housing Ltd',

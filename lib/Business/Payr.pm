@@ -3,7 +3,7 @@ package Business::Payr;
 =head1 NAME
 
 Business::Payr - Perl library for interacting with the Payr API
-(https://docs.mypayr.co.uk/)
+(https://docs.payr.com/)
 
 =head1 VERSION
 
@@ -60,7 +60,7 @@ v0.01
 =head1 DESCRIPTION
 
 L<Business::Payr> is a client library for interacting with the Payr
-third-party integration API (L<https://docs.mypayr.co.uk/>). It handles the
+third-party integration API (L<https://docs.payr.com/>). It handles the
 necessary authentication and transport logic, allowing you to focus on just
 the endpoints you want to call.
 
@@ -89,7 +89,7 @@ L<Business::Payr::Webhook>)
 =back
 
 The initial version of this distribution supports those steps described at
-L<https://docs.mypayr.co.uk/> and others will be added as necessary (pull
+L<https://docs.payr.com/> and others will be added as necessary (pull
 requests also welcome).
 
 =head1 DEBUGGING
@@ -128,7 +128,7 @@ KYC documents. Calls the C</thirdparty/onboarding/> endpoint.
 
 C<$user_args> should be a hash reference (single user) or array reference of
 hash references (multiple users) containing the fields described at
-L<https://docs.mypayr.co.uk/onboarding>.
+L<https://docs.payr.com/onboarding>.
 
 Required user fields: C<user_id>, C<email>, C<first_name>, C<last_name>,
 C<phone_number>, C<date_of_birth>, C<tenant> (array), and B<either>

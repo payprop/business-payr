@@ -1,6 +1,6 @@
 # NAME
 
-Business::Payr - Perl library for interacting with the Payr API ( https://docs.mypayr.co.uk/ )
+Business::Payr - Perl library for interacting with the Payr API ( https://docs.payr.com/ )
 
 # VERSION
 
@@ -106,7 +106,7 @@ interface. With this library you can:
 - **Verify and parse webhooks** for real-time payment notifications
 
 The initial version of this distribution supports those steps described at
-https://docs.mypayr.co.uk/ and others will be added as necessary (pull
+https://docs.payr.com/ and others will be added as necessary (pull
 requests also welcome).
 
 # ENVIRONMENTS
@@ -139,7 +139,7 @@ $Payr->onboard_user( [ \%user_one, \%user_two ] );
 
 `$user_args` should be a hash reference (single user) or array reference of
 hash references (multiple users) containing the fields described at
-https://docs.mypayr.co.uk/onboarding.
+https://docs.payr.com/onboarding.
 
 Required user fields: `user_id`, `email`, `first_name`, `last_name`,
 `phone_number`, `date_of_birth`, `tenant` (array), `kyc` (object).

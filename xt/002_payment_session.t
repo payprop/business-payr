@@ -22,10 +22,10 @@ isa_ok( $Payr, 'Business::Payr' );
 
 # ---------------------------------------------------------------------------
 # The user must have been onboarded before a payment session can be created.
-# Run xt/001_onboard.t first to ensure test user 99001 exists in the sandbox.
+# Run xt/001_onboard.t first to ensure test user 990010 exists in the sandbox.
 # ---------------------------------------------------------------------------
 
-my $TEST_EMAIL = 'test.user.99001@example.com';
+my $TEST_EMAIL = 'test.user.990010@example.com';
 
 subtest 'create_payment_session returns a PaymentSession object' => sub {
 
