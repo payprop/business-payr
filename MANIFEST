@@ -13,9 +13,3 @@ t/business/payr.t
 t/business/payr/paymentsession.t
 t/business/payr/request.t
 t/business/payr/webhook.t
-xt/000_changes.t
-xt/001_onboard.t
-xt/002_payment_session.t
-xt/003_rotate_token.t
-xt/README
-xt/Test/Credentials.pm

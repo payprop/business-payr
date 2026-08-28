@@ -1,5 +1,8 @@
 Revision history for Business-Payr
 
+0.02     2026-08-28
+        - Fix POD issues
+
 0.01     2026-04-13
         - First release
         - Support for /thirdparty/onboarding/ endpoint (onboard_user)

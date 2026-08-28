@@ -7,7 +7,7 @@ Business::Payr - Perl library for interacting with the Payr API
 
 =head1 VERSION
 
-v0.01
+v0.02
 
 =head1 SYNOPSIS
 
@@ -111,7 +111,7 @@ use namespace::autoclean;
 use Business::Payr::PaymentSession;
 use Carp qw/ croak /;
 
-$Business::Payr::VERSION = '0.01';
+$Business::Payr::VERSION = '0.02';
 
 =head1 METHODS
 
@@ -135,7 +135,7 @@ C<phone_number>, C<date_of_birth>, C<tenant> (array), and B<either>
 C<kyc> (object) B<or> C<agent_id> (integer).
 
 The C<kyc> field is optional. When it is not provided, C<agent_id> must be
-supplied instead — this is an integer reference to the agency associated with
+supplied instead - this is an integer reference to the agency associated with
 the tenancy, similar in type to C<user_id>. Supplying neither will result in
 an exception being thrown before any API call is made.
 
@@ -153,7 +153,7 @@ sub onboard_user (
     $self,
     $user_args,
 ) {
-    # Validate each user record before making the API call — this provides
+    # Validate each user record before making the API call - this provides
     # clearer error messages than relying solely on the API's 400 responses.
     my @users = ref $user_args eq 'ARRAY' ? @{$user_args} : ( $user_args );
     $self->_validate_onboard_args( $_ ) for @users;
